@@ -18,6 +18,9 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix=';', intents=intents)
 
+# Set up slash commands
+tree = bot.tree
+
 # Initialize APIs with environment variables
 fred = Fred(api_key=os.getenv('FRED_API_KEY'))
 
@@ -194,6 +197,14 @@ async def update_daily_events():
 async def on_ready():
     """Bot initialization"""
     print(f'{bot.user} has connected to Discord!')
+    
+    # Sync slash commands
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash command(s)")
+    except Exception as e:
+        print(f"Failed to sync slash commands: {e}")
+    
     update_daily_events.start()
     check_events.start()
 
@@ -525,5 +536,226 @@ async def get_correlation(ctx, series1: str, series2: str, days: int = 90):
         await ctx.send(embed=embed)
     except Exception as e:
         await ctx.send(f"Error calculating correlation: {str(e)}")
+
+# ===== SLASH COMMANDS =====
+
+@tree.command(name="setchannel", description="Set current channel for economic event announcements")
+@commands.has_permissions(administrator=True)
+async def slash_set_channel(interaction: discord.Interaction):
+    """Set current channel for economic event announcements (Admin only)"""
+    ANNOUNCEMENT_CHANNELS.add(interaction.channel.id)
+    await interaction.response.send_message("✅ This channel will now receive economic event notifications!")
+
+@tree.command(name="removechannel", description="Remove current channel from economic event announcements")
+@commands.has_permissions(administrator=True)
+async def slash_remove_channel(interaction: discord.Interaction):
+    """Remove current channel from economic event announcements (Admin only)"""
+    ANNOUNCEMENT_CHANNELS.discard(interaction.channel.id)
+    await interaction.response.send_message("❌ This channel will no longer receive economic event notifications!")
+
+@tree.command(name="events", description="Lists upcoming economic releases and events")
+async def slash_list_events(interaction: discord.Interaction):
+    """Lists upcoming economic releases and events"""
+    await interaction.response.defer()
+    
+    if not daily_events:
+        await interaction.followup.send("No economic events scheduled.")
+        return
+
+    # Group events by date and impact
+    high_impact_events = []
+    other_events = []
+    
+    for event in daily_events:
+        if event['impact'] == 'High':
+            high_impact_events.append(event)
+        else:
+            other_events.append(event)
+
+    # Create embed for high impact events
+    high_impact_embed = discord.Embed(
+        title="🔴 High Impact Economic Releases",
+        color=0xFF0000
+    )
+
+    # Format high impact events
+    for event in high_impact_events:
+        event_date = datetime.fromisoformat(event['time'])
+        date_str = event_date.strftime('%a, %b %d')  # e.g., "Mon, Nov 16"
+        if event_date.hour or event_date.minute:
+            time_str = event_date.strftime('%I:%M %p')
+            name_field = f"{date_str} • {time_str}"
+        else:
+            name_field = date_str
+        
+        high_impact_embed.add_field(
+            name=name_field,
+            value=f"**{event['title']}**\n└ Previous: {event['previous']}",
+            inline=False
+        )
+
+    # Create embed for other events
+    other_embed = discord.Embed(
+        title="🟡 Other Economic Releases",
+        color=0xFFD700
+    )
+
+    # Format other events more compactly
+    current_date = None
+    current_text = ""
+    
+    for event in other_events:
+        event_date = datetime.fromisoformat(event['time'])
+        date_str = event_date.strftime('%a, %b %d')
+        if event_date.hour or event_date.minute:
+            time_str = event_date.strftime('%I:%M %p')
+            time_component = f"`{time_str}` "
+        else:
+            time_component = ""
+        
+        if date_str != current_date:
+            if current_text:
+                other_embed.add_field(name=current_date, value=current_text, inline=False)
+                current_text = ""
+            current_date = date_str
+            
+        current_text += f"{time_component}**{event['title']}** ({event['previous']})\n"
+    
+    if current_text:
+        other_embed.add_field(name=current_date, value=current_text, inline=False)
+
+    # Send embeds
+    await interaction.followup.send(embed=high_impact_embed)
+    await interaction.followup.send(embed=other_embed)
+
+@tree.command(name="getdata", description="Get current value for an economic indicator")
+@discord.app_commands.describe(series_id="The series ID to look up (e.g., VIXCLS, CPIAUCSL)")
+async def slash_get_current_data(interaction: discord.Interaction, series_id: str):
+    """Get current value for an economic indicator"""
+    await interaction.response.defer()
+    
+    try:
+        # Get series info and data
+        info = fred.get_series_info(series_id)
+        # Retrieve full series to ensure we get the latest observation (fred returns ascending order)
+        series = fred.get_series(series_id)
+        # Drop any trailing NaNs just in case
+        series = series.dropna()
+        
+        embed = discord.Embed(
+            title=f"📊 {info['title']}",
+            color=0x00ff00
+        )
+        embed.add_field(name="Latest Value", value=f"{series.iloc[-1]:,.2f}")
+        embed.add_field(name="Last Updated", value=series.index[-1].strftime('%Y-%m-%d'))
+        embed.add_field(name="Units", value=info.get('units', 'N/A'))
+        
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"Error fetching data: {str(e)}")
+
+@tree.command(name="search", description="Search for economic data series by keywords")
+@discord.app_commands.describe(keywords="Keywords to search for (e.g., 'oil', 'treasury yield')")
+async def slash_search_series(interaction: discord.Interaction, keywords: str):
+    """Search for economic data series by keywords"""
+    await interaction.response.defer()
+    
+    try:
+        results = fred.search(keywords, limit=5)
+        
+        embed = discord.Embed(
+            title=f"🔍 Search Results for '{keywords}'",
+            color=0x00ff00
+        )
+        
+        for idx, row in results.iterrows():
+            # Format frequency to be more readable
+            freq = row['frequency'].replace(', Ending Friday', '')
+            freq = freq.replace(', Close', '')
+            
+            # Format title to be more concise
+            title = row['title']
+            if len(title) > 50:
+                title = title[:47] + "..."
+            
+            # Format units more cleanly
+            units = row['units']
+            if 'Index' in units:
+                if '=' in units:  # If it has a base year
+                    base_year = units.split('=')[1].strip()
+                    units = f"Index (Base: {base_year})"
+                else:
+                    units = "Index"
+            elif 'Dollars per' in units:
+                units = f"${units.replace('Dollars per', 'per')}"
+            elif 'Billions of Dollars' in units:
+                units = "$B"
+            elif 'Millions of Dollars' in units:
+                units = "$M"
+            
+            value_text = (
+                f"**Series ID:** `{idx}`\n"
+                f"**Frequency:** {freq}\n"
+                f"**Units:** {units}"
+            )
+            
+            embed.add_field(
+                name=f"📊 {title}",
+                value=value_text,
+                inline=False
+            )
+        
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"Error searching: {str(e)}")
+
+@tree.command(name="correlation", description="Calculate correlation between two economic indicators")
+@discord.app_commands.describe(
+    series1="First series ID (e.g., VIXCLS)",
+    series2="Second series ID (e.g., DCOILWTICO)", 
+    days="Number of days to analyze (default: 90)"
+)
+async def slash_get_correlation(interaction: discord.Interaction, series1: str, series2: str, days: int = 90):
+    """Calculate correlation between two economic indicators"""
+    await interaction.response.defer()
+    
+    try:
+        # Get data for both series
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        data1 = fred.get_series(series1, observation_start=start_date)
+        data2 = fred.get_series(series2, observation_start=start_date)
+        
+        # Calculate correlation
+        correlation = data1.corr(data2)
+        
+        embed = discord.Embed(
+            title=f"📊 Correlation Analysis ({days} days)",
+            description=f"Correlation between {series1} and {series2}",
+            color=0x00ff00
+        )
+        embed.add_field(name="Correlation Coefficient", value=f"{correlation:.2f}")
+        
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"Error calculating correlation: {str(e)}")
+
+@tree.command(name="chart", description="Get a stock chart from Finviz")
+@discord.app_commands.describe(
+    ticker="Stock ticker symbol (e.g., AAPL, MSFT)",
+    timeframe="Chart timeframe"
+)
+@discord.app_commands.choices(timeframe=[
+    discord.app_commands.Choice(name="Daily", value="d"),
+    discord.app_commands.Choice(name="Weekly", value="w"),
+    discord.app_commands.Choice(name="Monthly", value="m")
+])
+async def slash_chart(interaction: discord.Interaction, ticker: str, timeframe: str):
+    """Get a stock chart from Finviz"""
+    await interaction.response.defer()
+    
+    await send_chart(interaction.channel, ticker, timeframe)
+    await interaction.followup.send("Chart sent!", ephemeral=True)
 
 bot.run(os.getenv('DISCORD_TOKEN'))
