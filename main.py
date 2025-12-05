@@ -556,10 +556,11 @@ async def slash_remove_channel(interaction: discord.Interaction):
 @tree.command(name="events", description="Lists upcoming economic releases and events")
 async def slash_list_events(interaction: discord.Interaction):
     """Lists upcoming economic releases and events"""
-    await interaction.response.defer()
+    # Send immediate response to avoid timeout
+    await interaction.response.send_message("📅 Fetching economic events...")
     
     if not daily_events:
-        await interaction.followup.send("No economic events scheduled.")
+        await interaction.edit_original_response(content="No economic events scheduled.")
         return
 
     # Group events by date and impact
@@ -624,9 +625,11 @@ async def slash_list_events(interaction: discord.Interaction):
     if current_text:
         other_embed.add_field(name=current_date, value=current_text, inline=False)
 
-    # Send embeds
-    await interaction.followup.send(embed=high_impact_embed)
-    await interaction.followup.send(embed=other_embed)
+    # Send embeds - need to send as followup since we already responded
+    await interaction.edit_original_response(content="📅 Economic Events:", embed=high_impact_embed)
+    # For multiple embeds, we need to send followups
+    if other_events:
+        await interaction.followup.send(embed=other_embed)
 
 @tree.command(name="getdata", description="Get current value for an economic indicator")
 @discord.app_commands.describe(series_id="The series ID to look up (e.g., VIXCLS, CPIAUCSL)")
@@ -652,7 +655,8 @@ async def slash_list_events(interaction: discord.Interaction):
 ])
 async def slash_get_current_data(interaction: discord.Interaction, series_id: str):
     """Get current value for an economic indicator"""
-    await interaction.response.defer()
+    # Send immediate response to avoid timeout
+    await interaction.response.send_message("🔄 Fetching economic data...")
     
     try:
         # Get series info and data
@@ -670,9 +674,9 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
         embed.add_field(name="Last Updated", value=series.index[-1].strftime('%Y-%m-%d'))
         embed.add_field(name="Units", value=info.get('units', 'N/A'))
         
-        await interaction.followup.send(embed=embed)
+        await interaction.edit_original_response(content=None, embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"Error fetching data: {str(e)}")
+        await interaction.edit_original_response(content=f"Error fetching data: {str(e)}")
 
 @tree.command(name="search", description="Search for economic data series by keywords")
 @discord.app_commands.describe(keywords="Keywords to search for (e.g., 'oil', 'treasury yield')")
@@ -690,7 +694,8 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
 ])
 async def slash_search_series(interaction: discord.Interaction, keywords: str):
     """Search for economic data series by keywords"""
-    await interaction.response.defer()
+    # Send immediate response to avoid timeout
+    await interaction.response.send_message("🔍 Searching economic data series...")
     
     try:
         results = fred.search(keywords, limit=5)
@@ -737,9 +742,9 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
                 inline=False
             )
         
-        await interaction.followup.send(embed=embed)
+        await interaction.edit_original_response(content=None, embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"Error searching: {str(e)}")
+        await interaction.edit_original_response(content=f"Error searching: {str(e)}")
 
 @tree.command(name="correlation", description="Calculate correlation between two economic indicators")
 @discord.app_commands.describe(
@@ -780,7 +785,8 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
 ])
 async def slash_get_correlation(interaction: discord.Interaction, series1: str, series2: str, days: int = 90):
     """Calculate correlation between two economic indicators"""
-    await interaction.response.defer()
+    # Send immediate response to avoid timeout
+    await interaction.response.send_message("📊 Calculating correlation...")
     
     try:
         # Get data for both series
@@ -800,9 +806,9 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
         )
         embed.add_field(name="Correlation Coefficient", value=f"{correlation:.2f}")
         
-        await interaction.followup.send(embed=embed)
+        await interaction.edit_original_response(content=None, embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"Error calculating correlation: {str(e)}")
+        await interaction.edit_original_response(content=f"Error calculating correlation: {str(e)}")
 
 @tree.command(name="chart", description="Get a stock chart from Finviz")
 @discord.app_commands.describe(
@@ -827,10 +833,11 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
 ])
 async def slash_chart(interaction: discord.Interaction, ticker: str, timeframe: str):
     """Get a stock chart from Finviz"""
-    await interaction.response.defer()
+    # Send immediate response to avoid timeout
+    await interaction.response.send_message("📈 Generating chart...")
     
     await send_chart(interaction.channel, ticker, timeframe)
-    await interaction.followup.send("Chart sent!", ephemeral=True)
+    await interaction.edit_original_response(content="📈 Chart sent!", embed=None)
 
 @tree.command(name="help", description="Show available commands and usage information")
 async def slash_help(interaction: discord.Interaction):
