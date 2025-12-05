@@ -766,8 +766,8 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
 ])
 async def slash_chart(interaction: discord.Interaction, ticker: str, timeframe: str):
     """Get a stock chart from Finviz"""
-    # Send immediate response to avoid timeout
-    await interaction.response.send_message("📈 Generating chart...")
+    # Defer the response to avoid timeout since chart generation can take time
+    await interaction.response.defer()
     
     await send_chart(interaction.channel, ticker, timeframe)
     await interaction.edit_original_response(content="📈 Chart sent!", embed=None)
