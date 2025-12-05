@@ -635,14 +635,6 @@ async def slash_list_events(interaction: discord.Interaction):
 
 @tree.command(name="getdata", description="Get current value for an economic indicator")
 @discord.app_commands.describe(series_id="The series ID to look up (e.g., VIXCLS, CPIAUCSL)")
-@discord.app_commands.choices(series_id=[
-    discord.app_commands.Choice(name="Consumer Price Index (CPI)", value="CPIAUCSL"),
-    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
-    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
-    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
-    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO")
-])
 async def slash_get_current_data(interaction: discord.Interaction, series_id: str):
     """Get current value for an economic indicator"""
     try:
