@@ -818,8 +818,7 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
     discord.app_commands.Choice(name="Tesla Inc. (TSLA)", value="TSLA"),
     discord.app_commands.Choice(name="NVIDIA Corp. (NVDA)", value="NVDA"),
     discord.app_commands.Choice(name="SPDR S&P 500 ETF (SPY)", value="SPY"),
-    discord.app_commands.Choice(name="Invesco QQQ ETF (QQQ)", value="QQQ"),
-    discord.app_commands.Choice(name="Bitcoin USD (BTC-USD)", value="BTC-USD")
+    discord.app_commands.Choice(name="Invesco QQQ ETF (QQQ)", value="QQQ")
 ])
 @discord.app_commands.choices(timeframe=[
     discord.app_commands.Choice(name="Daily", value="d"),
