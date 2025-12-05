@@ -202,6 +202,8 @@ async def on_ready():
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} slash command(s)")
+        for cmd in synced:
+            print(f"  - /{cmd.name}: {cmd.description}")
     except Exception as e:
         print(f"Failed to sync slash commands: {e}")
     
@@ -635,29 +637,14 @@ async def slash_list_events(interaction: discord.Interaction):
 @discord.app_commands.describe(series_id="The series ID to look up (e.g., VIXCLS, CPIAUCSL)")
 @discord.app_commands.choices(series_id=[
     discord.app_commands.Choice(name="Consumer Price Index (CPI)", value="CPIAUCSL"),
-    discord.app_commands.Choice(name="Core CPI (excluding Food & Energy)", value="CPILFESL"),
-    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS"),
     discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Gross Domestic Product (GDP)", value="GDP"),
     discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
-    discord.app_commands.Choice(name="Industrial Production Index", value="INDPRO"),
-    discord.app_commands.Choice(name="Retail Sales", value="RSXFS"),
     discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
     discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
-    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
-    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
-    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
-    discord.app_commands.Choice(name="10Y-2Y Treasury Spread", value="T10Y2Y"),
-    discord.app_commands.Choice(name="Fed Balance Sheet", value="WALCL"),
-    discord.app_commands.Choice(name="Initial Jobless Claims", value="ICSA"),
-    discord.app_commands.Choice(name="Personal Consumption Expenditures", value="PCE"),
-    discord.app_commands.Choice(name="Housing Starts", value="HOUST")
+    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO")
 ])
 async def slash_get_current_data(interaction: discord.Interaction, series_id: str):
     """Get current value for an economic indicator"""
-    # Send immediate response to avoid timeout
-    await interaction.response.send_message("🔄 Fetching economic data...")
-    
     try:
         # Get series info and data
         info = fred.get_series_info(series_id)
@@ -674,9 +661,9 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
         embed.add_field(name="Last Updated", value=series.index[-1].strftime('%Y-%m-%d'))
         embed.add_field(name="Units", value=info.get('units', 'N/A'))
         
-        await interaction.edit_original_response(content=None, embed=embed)
+        await interaction.response.send_message(embed=embed)
     except Exception as e:
-        await interaction.edit_original_response(content=f"Error fetching data: {str(e)}")
+        await interaction.response.send_message(f"Error fetching data: {str(e)}")
 
 @tree.command(name="search", description="Search for economic data series by keywords")
 @discord.app_commands.describe(keywords="Keywords to search for (e.g., 'oil', 'treasury yield')")
@@ -684,19 +671,10 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
     discord.app_commands.Choice(name="Oil prices", value="oil"),
     discord.app_commands.Choice(name="Treasury yields", value="treasury yield"),
     discord.app_commands.Choice(name="GDP data", value="gdp"),
-    discord.app_commands.Choice(name="Employment data", value="employment"),
-    discord.app_commands.Choice(name="Inflation data", value="inflation"),
-    discord.app_commands.Choice(name="Federal Reserve", value="federal reserve"),
-    discord.app_commands.Choice(name="Housing market", value="housing"),
-    discord.app_commands.Choice(name="Retail sales", value="retail sales"),
-    discord.app_commands.Choice(name="Industrial production", value="industrial production"),
-    discord.app_commands.Choice(name="Money supply", value="money supply")
+    discord.app_commands.Choice(name="Employment data", value="employment")
 ])
 async def slash_search_series(interaction: discord.Interaction, keywords: str):
     """Search for economic data series by keywords"""
-    # Send immediate response to avoid timeout
-    await interaction.response.send_message("🔍 Searching economic data series...")
-    
     try:
         results = fred.search(keywords, limit=5)
         
@@ -742,9 +720,9 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
                 inline=False
             )
         
-        await interaction.edit_original_response(content=None, embed=embed)
+        await interaction.response.send_message(embed=embed)
     except Exception as e:
-        await interaction.edit_original_response(content=f"Error searching: {str(e)}")
+        await interaction.response.send_message(f"Error searching: {str(e)}")
 
 @tree.command(name="correlation", description="Calculate correlation between two economic indicators")
 @discord.app_commands.describe(
@@ -755,39 +733,22 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
 @discord.app_commands.choices(series1=[
     discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
     discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
-    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
-    discord.app_commands.Choice(name="S&P 500", value="SP500"),
     discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
-    discord.app_commands.Choice(name="Consumer Price Index", value="CPIAUCSL"),
-    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
-    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
-    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS")
+    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS")
 ])
 @discord.app_commands.choices(series2=[
     discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
     discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
-    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
-    discord.app_commands.Choice(name="S&P 500", value="SP500"),
     discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
-    discord.app_commands.Choice(name="Consumer Price Index", value="CPIAUCSL"),
-    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
-    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
-    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS")
+    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS")
 ])
 @discord.app_commands.choices(days=[
     discord.app_commands.Choice(name="30 days", value=30),
-    discord.app_commands.Choice(name="60 days", value=60),
     discord.app_commands.Choice(name="90 days", value=90),
-    discord.app_commands.Choice(name="180 days", value=180),
-    discord.app_commands.Choice(name="365 days", value=365)
+    discord.app_commands.Choice(name="180 days", value=180)
 ])
 async def slash_get_correlation(interaction: discord.Interaction, series1: str, series2: str, days: int = 90):
     """Calculate correlation between two economic indicators"""
-    # Send immediate response to avoid timeout
-    await interaction.response.send_message("📊 Calculating correlation...")
-    
     try:
         # Get data for both series
         end_date = datetime.now()
@@ -806,9 +767,9 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
         )
         embed.add_field(name="Correlation Coefficient", value=f"{correlation:.2f}")
         
-        await interaction.edit_original_response(content=None, embed=embed)
+        await interaction.response.send_message(embed=embed)
     except Exception as e:
-        await interaction.edit_original_response(content=f"Error calculating correlation: {str(e)}")
+        await interaction.response.send_message(f"Error calculating correlation: {str(e)}")
 
 @tree.command(name="chart", description="Get a stock chart from Finviz")
 @discord.app_commands.describe(
