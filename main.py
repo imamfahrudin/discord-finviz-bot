@@ -783,58 +783,36 @@ async def slash_help(interaction: discord.Interaction):
     
     embed.add_field(
         name="🔄 **Economic Events**",
-        value=(
-            "**`/events`** - List upcoming economic releases\n"
-            "**`;events`** - Same as above (prefix version)"
-        ),
+        value="**/events** - List upcoming economic releases",
         inline=False
     )
     
     embed.add_field(
         name="📈 **Data & Analysis**",
         value=(
-            "**`/getdata <series_id>`** - Get current economic indicator value\n"
-            "**`/search <keywords>`** - Search for economic data series\n"
-            "**`/correlation <series1> <series2> [days]`** - Calculate correlation between indicators\n"
-            "**`;getdata <series_id>`** - Prefix version\n"
-            "**`;search <keywords>`** - Prefix version\n"
-            "**`;correlation <series1> <series2> [days]`** - Prefix version"
+            "**/getdata <series_id>** - Get current economic indicator value\n"
+            "**/search <keywords>** - Search for economic data series\n"
+            "**/correlation <series1> <series2> [days]** - Calculate correlation between indicators"
         ),
         inline=False
     )
     
     embed.add_field(
         name="📊 **Charts**",
-        value=(
-            "**`/chart <ticker> <timeframe>`** - Get stock chart (Daily/Weekly/Monthly)\n"
-            "**`;ticker timeframe`** - e.g., `;AAPL d`, `;MSFT w`, `;TSLA m`"
-        ),
+        value="**/chart <ticker> <timeframe>** - Get stock chart (Daily/Weekly/Monthly)",
         inline=False
     )
     
     embed.add_field(
         name="⚙️ **Admin Commands**",
         value=(
-            "**`/setchannel`** - Enable economic event notifications in this channel\n"
-            "**`/removechannel`** - Disable economic event notifications\n"
-            "**`;setchannel`** - Prefix version\n"
-            "**`;removechannel`** - Prefix version"
+            "**/setchannel** - Enable economic event notifications in this channel\n"
+            "**/removechannel** - Disable economic event notifications"
         ),
         inline=False
     )
     
-    embed.add_field(
-        name="💡 **Tips**",
-        value=(
-            "• Both slash commands (`/command`) and prefix commands (`;command`) work\n"
-            "• Economic data comes from FRED (Federal Reserve Economic Data)\n"
-            "• Charts are sourced from Finviz\n"
-            "• Admin commands require administrator permissions"
-        ),
-        inline=False
-    )
-    
-    embed.set_footer(text="Use /command for modern Discord interface or ;command for traditional chat")
+    embed.set_footer(text="Economic data from FRED • Charts from Finviz • Admin commands require permissions")
     
     await interaction.response.send_message(embed=embed)
 
