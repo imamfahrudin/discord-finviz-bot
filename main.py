@@ -558,8 +558,8 @@ async def slash_remove_channel(interaction: discord.Interaction):
 @tree.command(name="events", description="Lists upcoming economic releases and events")
 async def slash_list_events(interaction: discord.Interaction):
     """Lists upcoming economic releases and events"""
-    # Send immediate response to avoid timeout
-    await interaction.response.send_message("📅 Fetching economic events...")
+    # Defer the response since we need to fetch and process event data
+    await interaction.response.defer()
     
     if not daily_events:
         await interaction.edit_original_response(content="No economic events scheduled.")
@@ -627,7 +627,7 @@ async def slash_list_events(interaction: discord.Interaction):
     if current_text:
         other_embed.add_field(name=current_date, value=current_text, inline=False)
 
-    # Send embeds - need to send as followup since we already responded
+    # Send embeds - edit original response with first embed, then followup for second
     await interaction.edit_original_response(content="📅 Economic Events:", embed=high_impact_embed)
     # For multiple embeds, we need to send followups
     if other_events:
@@ -814,6 +814,11 @@ async def slash_help(interaction: discord.Interaction):
     
     embed.set_footer(text="Economic data from FRED • Charts from Finviz • Admin commands require permissions")
     
-    await interaction.response.send_message(embed=embed)
+    try:
+        await interaction.response.send_message(embed=embed)
+    except Exception as e:
+        print(f"Help command failed: {e}")
+        # Fallback: send directly to channel
+        await interaction.channel.send(embed=embed)
 
 bot.run(os.getenv('DISCORD_TOKEN'))
