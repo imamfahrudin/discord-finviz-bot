@@ -94,6 +94,23 @@ Track important economic indicators:
 ;correlation VIXCLS DCOILWTICO 30  → Compare VIX and Oil prices over 30 days
 ```
 
+### Modern Slash Commands
+The bot now supports Discord's modern slash commands with dropdown helpers:
+```
+/events           → List upcoming economic releases
+/getdata          → Get economic data (with indicator dropdown)
+/search           → Search data series (with example terms)
+/correlation      → Calculate correlations (with series & timeframe choices)
+/chart            → Get stock charts (with popular tickers & timeframes)
+/help             → Show all available commands
+```
+
+**Benefits of slash commands:**
+- **Autocomplete dropdowns** for common indicators, tickers, and search terms
+- **Better mobile experience** with touch-friendly interfaces
+- **Parameter validation** prevents common mistakes
+- **Help tooltips** guide users through command usage
+
 ## 📈 Tracked Economic Indicators
 
 ### High Impact Events
