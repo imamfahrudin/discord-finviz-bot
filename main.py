@@ -667,12 +667,6 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
 
 @tree.command(name="search", description="Search for economic data series by keywords")
 @discord.app_commands.describe(keywords="Keywords to search for (e.g., 'oil', 'treasury yield')")
-@discord.app_commands.choices(keywords=[
-    discord.app_commands.Choice(name="Oil prices", value="oil"),
-    discord.app_commands.Choice(name="Treasury yields", value="treasury yield"),
-    discord.app_commands.Choice(name="GDP data", value="gdp"),
-    discord.app_commands.Choice(name="Employment data", value="employment")
-])
 async def slash_search_series(interaction: discord.Interaction, keywords: str):
     """Search for economic data series by keywords"""
     try:
