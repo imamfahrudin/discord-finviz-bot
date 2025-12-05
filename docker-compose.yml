@@ -1,0 +1,14 @@
+services:
+  discord-finviz-bot:
+    build: .
+    container_name: discord-finviz-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - TZ=America/New_York
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -18,7 +18,7 @@ A Discord bot that helps traders and investors track market-moving economic even
 3. **Set Up the Bot**
    ```bash
    # Clone the repository
-   git clone https://github.com/feveromo/discord-finviz-bot
+   git clone https://github.com/imamfahrudin/discord-finviz-bot
    cd discord-finviz-bot
 
    # Install dependencies
@@ -32,6 +32,36 @@ A Discord bot that helps traders and investors track market-moving economic even
 4. **Run the Bot**
    ```bash
    python main.py
+   ```
+
+### 🐳 Docker Deployment (Alternative)
+
+For easier deployment and management, you can use Docker:
+
+1. **Set Up Environment**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/imamfahrudin/discord-finviz-bot
+   cd discord-finviz-bot
+
+   # Copy environment template
+   cp .env.example .env
+
+   # Edit .env file with your actual tokens
+   # DISCORD_TOKEN=your_discord_bot_token_here
+   # FRED_API_KEY=your_fred_api_key_here
+   ```
+
+2. **Run with Docker Compose**
+   ```bash
+   # Build and start the bot
+   docker-compose up -d
+
+   # View logs
+   docker-compose logs -f
+
+   # Stop the bot
+   docker-compose down
    ```
 
 5. **Invite Bot to Your Server**
