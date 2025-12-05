@@ -766,11 +766,16 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
 ])
 async def slash_chart(interaction: discord.Interaction, ticker: str, timeframe: str):
     """Get a stock chart from Finviz"""
-    # Defer the response to avoid timeout since chart generation can take time
-    await interaction.response.defer()
-    
-    await send_chart(interaction.channel, ticker, timeframe)
-    await interaction.edit_original_response(content="📈 Chart sent!", embed=None)
+    try:
+        # Defer the response to avoid timeout since chart generation can take time
+        await interaction.response.defer()
+        
+        await send_chart(interaction.channel, ticker, timeframe)
+        await interaction.edit_original_response(content="📈 Chart sent!", embed=None)
+    except Exception as e:
+        # If defer fails, try sending directly to channel as fallback
+        print(f"Defer failed, using fallback: {e}")
+        await send_chart(interaction.channel, ticker, timeframe)
 
 @tree.command(name="help", description="Show available commands and usage information")
 async def slash_help(interaction: discord.Interaction):
