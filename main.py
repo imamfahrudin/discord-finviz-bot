@@ -730,23 +730,6 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
     series2="Second series ID (e.g., DCOILWTICO)", 
     days="Number of days to analyze (default: 90)"
 )
-@discord.app_commands.choices(series1=[
-    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
-    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
-    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS")
-])
-@discord.app_commands.choices(series2=[
-    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
-    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
-    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
-    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS")
-])
-@discord.app_commands.choices(days=[
-    discord.app_commands.Choice(name="30 days", value=30),
-    discord.app_commands.Choice(name="90 days", value=90),
-    discord.app_commands.Choice(name="180 days", value=180)
-])
 async def slash_get_correlation(interaction: discord.Interaction, series1: str, series2: str, days: int = 90):
     """Calculate correlation between two economic indicators"""
     try:
@@ -776,17 +759,6 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
     ticker="Stock ticker symbol (e.g., AAPL, MSFT)",
     timeframe="Chart timeframe"
 )
-@discord.app_commands.choices(ticker=[
-    discord.app_commands.Choice(name="Apple Inc. (AAPL)", value="AAPL"),
-    discord.app_commands.Choice(name="Microsoft Corp. (MSFT)", value="MSFT"),
-    discord.app_commands.Choice(name="Amazon.com Inc. (AMZN)", value="AMZN"),
-    discord.app_commands.Choice(name="Alphabet Inc. (GOOGL)", value="GOOGL"),
-    discord.app_commands.Choice(name="Meta Platforms Inc. (META)", value="META"),
-    discord.app_commands.Choice(name="Tesla Inc. (TSLA)", value="TSLA"),
-    discord.app_commands.Choice(name="NVIDIA Corp. (NVDA)", value="NVDA"),
-    discord.app_commands.Choice(name="SPDR S&P 500 ETF (SPY)", value="SPY"),
-    discord.app_commands.Choice(name="Invesco QQQ ETF (QQQ)", value="QQQ")
-])
 @discord.app_commands.choices(timeframe=[
     discord.app_commands.Choice(name="Daily", value="d"),
     discord.app_commands.Choice(name="Weekly", value="w"),
