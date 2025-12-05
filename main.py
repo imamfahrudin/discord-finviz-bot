@@ -630,6 +630,26 @@ async def slash_list_events(interaction: discord.Interaction):
 
 @tree.command(name="getdata", description="Get current value for an economic indicator")
 @discord.app_commands.describe(series_id="The series ID to look up (e.g., VIXCLS, CPIAUCSL)")
+@discord.app_commands.choices(series_id=[
+    discord.app_commands.Choice(name="Consumer Price Index (CPI)", value="CPIAUCSL"),
+    discord.app_commands.Choice(name="Core CPI (excluding Food & Energy)", value="CPILFESL"),
+    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS"),
+    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
+    discord.app_commands.Choice(name="Gross Domestic Product (GDP)", value="GDP"),
+    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
+    discord.app_commands.Choice(name="Industrial Production Index", value="INDPRO"),
+    discord.app_commands.Choice(name="Retail Sales", value="RSXFS"),
+    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
+    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
+    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
+    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
+    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
+    discord.app_commands.Choice(name="10Y-2Y Treasury Spread", value="T10Y2Y"),
+    discord.app_commands.Choice(name="Fed Balance Sheet", value="WALCL"),
+    discord.app_commands.Choice(name="Initial Jobless Claims", value="ICSA"),
+    discord.app_commands.Choice(name="Personal Consumption Expenditures", value="PCE"),
+    discord.app_commands.Choice(name="Housing Starts", value="HOUST")
+])
 async def slash_get_current_data(interaction: discord.Interaction, series_id: str):
     """Get current value for an economic indicator"""
     await interaction.response.defer()
@@ -656,6 +676,18 @@ async def slash_get_current_data(interaction: discord.Interaction, series_id: st
 
 @tree.command(name="search", description="Search for economic data series by keywords")
 @discord.app_commands.describe(keywords="Keywords to search for (e.g., 'oil', 'treasury yield')")
+@discord.app_commands.choices(keywords=[
+    discord.app_commands.Choice(name="Oil prices", value="oil"),
+    discord.app_commands.Choice(name="Treasury yields", value="treasury yield"),
+    discord.app_commands.Choice(name="GDP data", value="gdp"),
+    discord.app_commands.Choice(name="Employment data", value="employment"),
+    discord.app_commands.Choice(name="Inflation data", value="inflation"),
+    discord.app_commands.Choice(name="Federal Reserve", value="federal reserve"),
+    discord.app_commands.Choice(name="Housing market", value="housing"),
+    discord.app_commands.Choice(name="Retail sales", value="retail sales"),
+    discord.app_commands.Choice(name="Industrial production", value="industrial production"),
+    discord.app_commands.Choice(name="Money supply", value="money supply")
+])
 async def slash_search_series(interaction: discord.Interaction, keywords: str):
     """Search for economic data series by keywords"""
     await interaction.response.defer()
@@ -715,6 +747,37 @@ async def slash_search_series(interaction: discord.Interaction, keywords: str):
     series2="Second series ID (e.g., DCOILWTICO)", 
     days="Number of days to analyze (default: 90)"
 )
+@discord.app_commands.choices(series1=[
+    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
+    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
+    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
+    discord.app_commands.Choice(name="S&P 500", value="SP500"),
+    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
+    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
+    discord.app_commands.Choice(name="Consumer Price Index", value="CPIAUCSL"),
+    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
+    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
+    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS")
+])
+@discord.app_commands.choices(series2=[
+    discord.app_commands.Choice(name="VIX Volatility Index", value="VIXCLS"),
+    discord.app_commands.Choice(name="Crude Oil WTI", value="DCOILWTICO"),
+    discord.app_commands.Choice(name="US Dollar Index", value="DTWEXB"),
+    discord.app_commands.Choice(name="S&P 500", value="SP500"),
+    discord.app_commands.Choice(name="Unemployment Rate", value="UNRATE"),
+    discord.app_commands.Choice(name="Federal Funds Rate", value="FEDFUNDS"),
+    discord.app_commands.Choice(name="Consumer Price Index", value="CPIAUCSL"),
+    discord.app_commands.Choice(name="10-Year Treasury Rate", value="DGS10"),
+    discord.app_commands.Choice(name="2-Year Treasury Rate", value="DGS2"),
+    discord.app_commands.Choice(name="Nonfarm Payroll", value="PAYEMS")
+])
+@discord.app_commands.choices(days=[
+    discord.app_commands.Choice(name="30 days", value=30),
+    discord.app_commands.Choice(name="60 days", value=60),
+    discord.app_commands.Choice(name="90 days", value=90),
+    discord.app_commands.Choice(name="180 days", value=180),
+    discord.app_commands.Choice(name="365 days", value=365)
+])
 async def slash_get_correlation(interaction: discord.Interaction, series1: str, series2: str, days: int = 90):
     """Calculate correlation between two economic indicators"""
     await interaction.response.defer()
@@ -746,6 +809,18 @@ async def slash_get_correlation(interaction: discord.Interaction, series1: str, 
     ticker="Stock ticker symbol (e.g., AAPL, MSFT)",
     timeframe="Chart timeframe"
 )
+@discord.app_commands.choices(ticker=[
+    discord.app_commands.Choice(name="Apple Inc. (AAPL)", value="AAPL"),
+    discord.app_commands.Choice(name="Microsoft Corp. (MSFT)", value="MSFT"),
+    discord.app_commands.Choice(name="Amazon.com Inc. (AMZN)", value="AMZN"),
+    discord.app_commands.Choice(name="Alphabet Inc. (GOOGL)", value="GOOGL"),
+    discord.app_commands.Choice(name="Meta Platforms Inc. (META)", value="META"),
+    discord.app_commands.Choice(name="Tesla Inc. (TSLA)", value="TSLA"),
+    discord.app_commands.Choice(name="NVIDIA Corp. (NVDA)", value="NVDA"),
+    discord.app_commands.Choice(name="SPDR S&P 500 ETF (SPY)", value="SPY"),
+    discord.app_commands.Choice(name="Invesco QQQ ETF (QQQ)", value="QQQ"),
+    discord.app_commands.Choice(name="Bitcoin USD (BTC-USD)", value="BTC-USD")
+])
 @discord.app_commands.choices(timeframe=[
     discord.app_commands.Choice(name="Daily", value="d"),
     discord.app_commands.Choice(name="Weekly", value="w"),
